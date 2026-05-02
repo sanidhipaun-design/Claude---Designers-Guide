@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Designer Who Can't Code (Until Now)</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Mono:wght@400;500&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1714;
+  --paper: #f5f0e8;
+  --cream: #ede8dc;
+  --accent: #e85d26;
+  --accent2: #3b5bdb;
+  --accent3: #2d9b6f;
+  --muted: #7a7468;
+  --card-bg: #ffffff;
+  --highlight: #fff8e8;
+  --tag-bg: #f0ece3;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Syne', sans-serif; background: var(--paper); color: var(--ink); overflow-x: hidden; }
+
+/* PROGRESS */
+.progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: var(--accent); z-index: 200; transition: width 0.15s; }
+
+/* NAV */
+.nav-dots { position: fixed; right: 20px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 100; }
+.nav-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(122,116,104,0.4); cursor: pointer; transition: all 0.3s; border: none; }
+.nav-dot.active { background: var(--accent); transform: scale(1.5); }
+.nav-label { position: fixed; right: 44px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 0.1em; background: var(--paper); padding: 3px 8px; border-radius: 4px; pointer-events: none; opacity: 0; transition: opacity 0.2s; white-space: nowrap; }
+
+/* SECTIONS */
+section { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 80px 48px; position: relative; }
+section:nth-child(even) { background: var(--cream); }
+.chapter-inner { max-width: 1000px; width: 100%; margin: 0 auto; }
+.chapter-num { font-family: 'Fraunces', serif; font-size: 9rem; font-weight: 600; position: absolute; right: -10px; top: -30px; opacity: 0.05; line-height: 1; pointer-events: none; user-select: none; }
+.section-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+.chapter-title { font-family: 'Fraunces', serif; font-size: clamp(2.2rem, 5vw, 4rem); font-weight: 300; line-height: 1.1; margin-bottom: 12px; }
+.chapter-intro { font-size: 1rem; color: var(--muted); line-height: 1.75; max-width: 620px; margin-bottom: 44px; }
+
+/* HERO */
+.hero { flex-direction: column; text-align: center; background: var(--ink) !important; color: var(--paper); overflow: hidden; justify-content: center; align-items: center; }
+.hero-noise { position: absolute; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E"); opacity: 0.25; }
+.hero-tag { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 28px; opacity: 0; animation: fadeUp 0.8s 0.2s forwards; }
+.hero h1 { font-family: 'Fraunces', serif; font-size: clamp(3.2rem, 9vw, 7.5rem); font-weight: 300; line-height: 1.02; letter-spacing: -0.02em; opacity: 0; animation: fadeUp 0.8s 0.4s forwards; }
+.hero h1 em { font-style: italic; color: var(--accent); }
+.hero-sub { font-size: 1.05rem; color: rgba(245,240,232,0.55); margin-top: 28px; max-width: 480px; line-height: 1.7; opacity: 0; animation: fadeUp 0.8s 0.6s forwards; text-wrap: balance; }
+.scroll-hint { position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.15em; color: rgba(245,240,232,0.35); display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0; animation: fadeUp 1s 1.3s forwards; white-space: nowrap; }
+.scroll-arrow { width: 1px; height: 44px; background: linear-gradient(to bottom, transparent, rgba(245,240,232,0.25)); animation: scrollPulse 2s infinite; }
+
+/* TIMELINE */
+.timeline { position: relative; padding-left: 36px; max-width: 680px; }
+.timeline::before { content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 1.5px; background: rgba(122,116,104,0.2); }
+.timeline-item { position: relative; margin-bottom: 40px; opacity: 0; transform: translateX(-18px); transition: all 0.5s; }
+.timeline-item.visible { opacity: 1; transform: translateX(0); }
+.timeline-item::before { content: ''; position: absolute; left: -42px; top: 8px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+.timeline-date { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: var(--accent); text-transform: uppercase; margin-bottom: 6px; }
+.timeline-text { font-size: 1rem; line-height: 1.7; color: var(--ink); }
+.timeline-note { margin-top: 8px; font-size: 0.85rem; color: var(--muted); font-style: italic; line-height: 1.6; }
+
+/* FIGMA VS CODE */
+.vs-wrap { display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: start; }
+@media (max-width: 680px) { .vs-wrap { grid-template-columns: 1fr; } }
+.vs-card { background: var(--card-bg); border-radius: 18px; padding: 24px 28px; }
+.vs-card.dark { background: var(--ink); color: var(--paper); }
+.vs-title-row { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid rgba(0,0,0,0.06); }
+.vs-card.dark .vs-title-row { border-bottom-color: rgba(255,255,255,0.08); }
+.vs-title { font-size: 0.95rem; font-weight: 700; }
+.vs-subtitle { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.1em; }
+.vs-card.dark .vs-subtitle { color: rgba(245,240,232,0.35); }
+.vs-row { display: flex; justify-content: space-between; align-items: baseline; padding: 9px 0; border-bottom: 1px solid rgba(0,0,0,0.04); font-size: 0.88rem; gap: 12px; }
+.vs-card.dark .vs-row { border-bottom-color: rgba(255,255,255,0.05); }
+.vs-row:last-child { border-bottom: none; }
+.vs-concept { color: var(--muted); font-size: 0.8rem; text-align: right; font-family: 'DM Mono', monospace; }
+.vs-card.dark .vs-concept { color: rgba(245,240,232,0.35); }
+.vs-arrow { display: flex; align-items: center; justify-content: center; font-family: 'Fraunces', serif; font-size: 2.2rem; color: var(--accent); font-weight: 300; padding-top: 60px; }
+
+/* CATEGORIES */
+.cat-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
+.cat-tab { padding: 7px 18px; border-radius: 40px; font-size: 0.82rem; border: 1.5px solid transparent; cursor: pointer; transition: all 0.2s; font-family: 'Syne', sans-serif; font-weight: 700; background: var(--tag-bg); color: var(--muted); }
+.cat-tab.active { background: var(--accent); color: white; border-color: var(--accent); }
+.cat-tab:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+
+/* GLOSSARY GRID */
+.glossary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.gloss-card { background: var(--card-bg); border-radius: 16px; padding: 22px; cursor: pointer; border: 2px solid transparent; position: relative; overflow: hidden; opacity: 0; transform: translateY(16px); transition: opacity 0.4s, transform 0.4s, box-shadow 0.2s, border-color 0.2s; }
+.gloss-card.visible { opacity: 1; transform: translateY(0); }
+.gloss-card:hover { box-shadow: 0 10px 36px rgba(0,0,0,0.09); border-color: rgba(232,93,38,0.3); }
+.gloss-card.active { border-color: var(--accent); background: var(--highlight); }
+.gloss-card.hidden { display: none; }
+.card-emoji { font-size: 24px; margin-bottom: 10px; display: block; }
+.card-cat { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.card-name { font-size: 1.1rem; font-weight: 700; margin-bottom: 6px; }
+.card-short { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+.card-tag { display: inline-block; margin-top: 10px; background: var(--tag-bg); padding: 3px 10px; border-radius: 20px; font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 0.08em; }
+
+/* EXPANDED PANEL */
+.expand-panel { background: var(--ink); color: var(--paper); border-radius: 22px; padding: 36px 40px; margin-top: 20px; display: none; animation: expandIn 0.3s ease; }
+.expand-panel.open { display: block; }
+.panel-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 24px; }
+.panel-title-block {}
+.panel-emoji { font-size: 2rem; margin-bottom: 6px; }
+.panel-title { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 300; color: var(--paper); }
+.panel-tagline { font-family: 'DM Mono', monospace; font-size: 11px; color: rgba(245,240,232,0.4); letter-spacing: 0.1em; margin-top: 4px; }
+.close-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: var(--paper); padding: 8px 18px; border-radius: 40px; cursor: pointer; font-family: 'Syne', sans-serif; font-size: 0.82rem; transition: background 0.2s; flex-shrink: 0; }
+.close-btn:hover { background: rgba(255,255,255,0.15); }
+
+.panel-sections { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 680px) { .panel-sections { grid-template-columns: 1fr; } }
+.panel-block { background: rgba(255,255,255,0.05); border-radius: 14px; padding: 20px 22px; }
+.panel-block.full { grid-column: 1 / -1; }
+.panel-block-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(245,240,232,0.35); margin-bottom: 10px; }
+.panel-block p { font-size: 0.9rem; line-height: 1.75; color: rgba(245,240,232,0.8); }
+.panel-block .analogy-text { font-family: 'Fraunces', serif; font-size: 1rem; font-style: italic; color: #f5d0be; line-height: 1.7; }
+.panel-block ul { padding-left: 18px; font-size: 0.88rem; color: rgba(245,240,232,0.75); line-height: 2; }
+.panel-block li { margin-bottom: 2px; }
+.claude-says { background: rgba(232,93,38,0.12); border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0; padding: 14px 18px; font-family: 'DM Mono', monospace; font-size: 0.82rem; color: rgba(245,240,232,0.7); line-height: 1.65; }
+.code-snip { background: rgba(0,0,0,0.3); border-radius: 8px; padding: 12px 16px; font-family: 'DM Mono', monospace; font-size: 0.8rem; color: #a8e6cf; line-height: 1.8; margin-top: 8px; overflow-x: auto; white-space: pre; }
+
+/* CLAUDE BRAIN SECTION */
+.brain-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: start; }
+@media (max-width: 700px) { .brain-grid { grid-template-columns: 1fr; } }
+.brain-step { display: flex; gap: 18px; margin-bottom: 24px; align-items: flex-start; opacity: 0; transform: translateY(14px); transition: all 0.45s; }
+.brain-step.visible { opacity: 1; transform: translateY(0); }
+.brain-num { font-family: 'Fraunces', serif; font-size: 2.4rem; font-weight: 600; color: var(--accent); line-height: 1; min-width: 44px; }
+.brain-text h4 { font-size: 1rem; font-weight: 700; margin-bottom: 5px; }
+.brain-text p { font-size: 0.88rem; color: var(--muted); line-height: 1.65; }
+
+/* CHAT MOCK */
+.chat-mock { background: var(--ink); border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 12px; }
+.chat-header { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.18em; color: rgba(245,240,232,0.3); text-transform: uppercase; margin-bottom: 4px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.bubble { border-radius: 16px; padding: 11px 15px; font-size: 0.86rem; line-height: 1.55; max-width: 86%; }
+.bubble.user { background: var(--accent); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+.bubble.claude { background: rgba(255,255,255,0.09); color: var(--paper); align-self: flex-start; border-bottom-left-radius: 4px; }
+.bubble.claude code { font-family: 'DM Mono', monospace; font-size: 0.78rem; background: rgba(0,0,0,0.3); padding: 1px 5px; border-radius: 4px; }
+
+/* HOW IT WORKS FLOW */
+.flow-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 28px; }
+.flow-step { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.flow-box { background: rgba(255,255,255,0.1); border-radius: 12px; padding: 14px 18px; font-size: 0.85rem; font-weight: 700; text-align: center; border: 1.5px solid rgba(255,255,255,0.15); color: var(--paper); width: 100%; }
+.flow-box.accent { background: var(--accent); color: white; border-color: var(--accent); }
+.flow-box.final { background: var(--paper); color: var(--ink); border-color: var(--paper); }
+.flow-step-num { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.15em; color: rgba(245,240,232,0.3); text-transform: uppercase; }
+.flow-caption { font-size: 0.8rem; color: rgba(245,240,232,0.4); font-family: 'DM Mono', monospace; margin-top: 6px; letter-spacing: 0.06em; }
+
+/* LESSONS */
+.lessons-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+.lesson-item { display: flex; gap: 22px; align-items: flex-start; padding: 22px 26px; background: var(--card-bg); border-radius: 16px; opacity: 0; transform: translateX(-18px); transition: all 0.4s; }
+.lesson-item.visible { opacity: 1; transform: translateX(0); }
+.lesson-num { font-family: 'Fraunces', serif; font-size: 2.4rem; font-weight: 600; color: var(--accent); line-height: 1; min-width: 40px; }
+.lesson-body {}
+.lesson-title { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+.lesson-text { font-size: 0.9rem; line-height: 1.7; color: var(--muted); }
+
+/* QUIZ */
+.quiz-wrap { background: var(--card-bg); border-radius: 20px; padding: 30px 32px; }
+.quiz-meta { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; margin-bottom: 14px; }
+.quiz-q { font-size: 1.05rem; font-weight: 700; line-height: 1.5; margin-bottom: 20px; }
+.quiz-options { display: flex; flex-direction: column; gap: 9px; }
+.quiz-btn { text-align: left; padding: 12px 18px; border: 1.5px solid var(--cream); background: none; border-radius: 12px; font-family: 'Syne', sans-serif; font-size: 0.88rem; cursor: pointer; transition: all 0.18s; color: var(--ink); line-height: 1.45; }
+.quiz-btn:hover { border-color: var(--accent2); background: #f0f4ff; }
+.quiz-btn.correct { border-color: var(--accent3); background: #eaf7f2; color: #1a6040; }
+.quiz-btn.wrong { border-color: #e24b4a; background: #fff0f0; color: #7a1f1f; }
+.quiz-result { margin-top: 16px; font-size: 0.88rem; line-height: 1.65; padding: 14px 18px; border-radius: 12px; display: none; }
+.quiz-result.show { display: block; }
+.quiz-result.good { background: #eaf7f2; color: #1a6040; }
+.quiz-result.bad { background: #fff0f0; color: #7a1f1f; }
+.quiz-next { margin-top: 16px; background: var(--ink); color: var(--paper); border: none; padding: 10px 26px; border-radius: 40px; font-family: 'Syne', sans-serif; cursor: pointer; font-size: 0.88rem; display: none; transition: opacity 0.2s; }
+.quiz-next:hover { opacity: 0.75; }
+.quiz-next.show { display: inline-block; }
+
+/* ENDING */
+.ending { background: var(--accent) !important; color: white; flex-direction: column; text-align: center; }
+.ending h2 { font-family: 'Fraunces', serif; font-size: clamp(2.6rem, 7vw, 5.5rem); font-weight: 300; line-height: 1.08; margin-bottom: 24px; }
+.ending p { font-size: 1rem; opacity: 0.85; max-width: 500px; line-height: 1.7; }
+.badge-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 36px; }
+.badge { background: rgba(255,255,255,0.18); padding: 7px 18px; border-radius: 40px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; border: 1px solid rgba(255,255,255,0.28); }
+
+/* ANIMATIONS */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes expandIn { from { opacity: 0; transform: scaleY(0.94); transform-origin: top; } to { opacity: 1; transform: scaleY(1); } }
+@keyframes scrollPulse { 0%,100% { opacity: 0.25; } 50% { opacity: 0.7; } }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progress"></div>
+<nav class="nav-dots" id="navDots"></nav>
+
+<!-- ① HERO -->
+<section class="hero" id="s0">
+  <div class="hero-noise"></div>
+  <div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;text-align:center;width:100%;max-width:800px;margin:0 auto;">
+    <p class="hero-tag">Hi, I'm Sanidhi — a designer who couldn't code</p>
+    <h1>From Figma<br>to <em>Functions</em></h1>
+    <p class="hero-sub">Zero coding background. One AI. Here's everything I learned about the words, tools and ideas developers live in — explained in pure designer language.</p>
+    <div class="scroll-hint" style="position:relative;bottom:auto;left:auto;transform:none;margin-top:52px;"><span>scroll to explore</span><div class="scroll-arrow"></div></div>
+  </div>
+</section>
+
+<!-- ② JOURNEY -->
+<section id="s1">
+  <div class="chapter-inner" style="position:relative;">
+    <span class="chapter-num">01</span>
+    <p class="section-label">Chapter 01 — The Journey</p>
+    <h2 class="chapter-title">Life was simple.<br><em style="font-style:italic;font-family:'Fraunces',serif;">Then came Claude.</em></h2>
+    <p class="chapter-intro">Here's how a designer goes from zero to "oh, I actually understand what's happening."</p>
+    <div class="timeline">
+      <div class="timeline-item">
+        <p class="timeline-date">Before Everything</p>
+        <p class="timeline-text">I lived entirely in Figma. Frames, auto-layout, components, variables. HEX codes were as technical as it got. "The developers will handle the rest" was my whole plan.</p>
+        <p class="timeline-note">The closest I got to code was inspecting a CSS value in the Dev Mode panel and immediately closing the tab.</p>
+      </div>
+      <div class="timeline-item">
+        <p class="timeline-date">Day 1 with Claude</p>
+        <p class="timeline-text">Someone said "just prompt it, it'll do everything." So I typed what I wanted. Claude wrote something back that looked like total gibberish — but then it appeared on screen exactly as I imagined it. That felt like magic.</p>
+        <p class="timeline-note">Claude asked if I wanted to "push it to GitHub". I said yes. I had absolutely no idea what that meant.</p>
+      </div>
+      <div class="timeline-item">
+        <p class="timeline-date">Week 1</p>
+        <p class="timeline-text">I started noticing words I didn't understand: Git, npm, Tailwind, component, deploy, localhost, terminal, TypeScript. I nodded and clicked approve on everything. The imposter syndrome was real.</p>
+        <p class="timeline-note">I genuinely thought "terminal" was just what they called the app because it looked scary.</p>
+      </div>
+      <div class="timeline-item">
+        <p class="timeline-date">Week 3</p>
+        <p class="timeline-text">I started asking Claude to explain what it was doing, not just do it. That changed everything. Turns out, most coding concepts are just design concepts with different names.</p>
+        <p class="timeline-note">The biggest revelation: a React component is basically a Figma master component. I already understood components.</p>
+      </div>
+      <div class="timeline-item">
+        <p class="timeline-date">Now</p>
+        <p class="timeline-text">I know what the words mean. I know what Claude is doing when it does it. I'm not a developer — but I'm a much better collaborator, a better prompter, and honestly a better designer for it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ③ TWO WORLDS -->
+<section id="s2">
+  <div class="chapter-inner" style="position:relative;">
+    <span class="chapter-num">02</span>
+    <p class="section-label">Chapter 02 — Two Worlds</p>
+    <h2 class="chapter-title">Everything in code<br>has a Figma name.</h2>
+    <p class="chapter-intro">The biggest unlock for me was realising nothing in code is truly alien. Every concept maps to something I already worked with every day.</p>
+    <div class="vs-wrap">
+      <div class="vs-card">
+        <div class="vs-title-row">
+          <span style="font-size:20px;">🎨</span>
+          <div><p class="vs-title">In Figma...</p><p class="vs-subtitle">what you already know</p></div>
+        </div>
+        <div class="vs-row"><span>Master component</span><span class="vs-concept">building block</span></div>
+        <div class="vs-row"><span>Auto-layout</span><span class="vs-concept">spacing system</span></div>
+        <div class="vs-row"><span>Styles / Variables</span><span class="vs-concept">design tokens</span></div>
+        <div class="vs-row"><span>Variants / States</span><span class="vs-concept">component logic</span></div>
+        <div class="vs-row"><span>Version history</span><span class="vs-concept">time machine</span></div>
+        <div class="vs-row"><span>Shared library</span><span class="vs-concept">team repo</span></div>
+        <div class="vs-row"><span>Publish to Community</span><span class="vs-concept">going live</span></div>
+        <div class="vs-row"><span>Plugin</span><span class="vs-concept">added feature</span></div>
+        <div class="vs-row"><span>Inspect panel</span><span class="vs-concept">reading values</span></div>
+        <div class="vs-row"><span>Figma file</span><span class="vs-concept">the project</span></div>
+        <div class="vs-row"><span>Prototype mode</span><span class="vs-concept">fake interactions</span></div>
+        <div class="vs-row"><span>Frame</span><span class="vs-concept">container</span></div>
+      </div>
+      <div class="vs-arrow">↔</div>
+      <div class="vs-card dark">
+        <div class="vs-title-row">
+          <span style="font-size:20px;">💻</span>
+          <div><p class="vs-title" style="color:var(--paper)">In Code...</p><p class="vs-subtitle">the new name</p></div>
+        </div>
+        <div class="vs-row" style="color:var(--paper)"><span>React Component</span><span class="vs-concept">building block</span></div>
+        <div class="vs-row" style="color:var(--paper)"><span>CSS / Flexbox / Grid</span><span class="vs-concept">spacing system</span></div>
+        <div class="vs-row" style="color:var(--paper)"><span>CSS variables / Tailwind config</span><span class="vs-concept">design tokens</span></div>
+        <div class="vs-row" style="color:var(--paper)"><span>Props / State</span><span class="vs-concept">component logic</span></div>
+        <div class="vs-row" style="color:var(--paper)"><span>Git commits</span><span class="vs-concept">time machine</span></div>
+        <div class="vs-row" style="color:var(--paper)"><span>GitHub repository</span><span class="vs-concept">team repo</span></div>
+        <div class="vs-row" style="color:var(--paper)"><span>Deploy / npm publish</span><span class="vs-concept">going live</span></div>
+        <div class="vs-row" style="color:var(--paper)"><span>npm package</span><span class="vs-concept">added feature</span></div>
+        <div class="vs-row" style="color:var(--paper)"><span>Browser DevTools</span><span class="vs-concept">reading values</span></div>
+        <div class="vs-row" style="color:var(--paper)"><span>Repository / Codebase</span><span class="vs-concept">the project</span></div>
+        <div class="vs-row" style="color:var(--paper)"><span>JavaScript / React</span><span class="vs-concept">real interactions</span></div>
+        <div class="vs-row" style="color:var(--paper)"><span>div / section / article</span><span class="vs-concept">container</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ④ GLOSSARY -->
+<section id="s3" style="flex-direction:column;align-items:flex-start;padding-top:100px;padding-bottom:100px;">
+  <div class="chapter-inner" style="position:relative;">
+    <span class="chapter-num">03</span>
+    <p class="section-label">Chapter 03 — The Glossary</p>
+    <h2 class="chapter-title">Every word that confused me.</h2>
+    <p class="chapter-intro">26 terms. All explained with Figma analogies, real examples, and what Claude actually says when it uses them. Tap any card to expand.</p>
+
+    <div class="cat-tabs" id="catTabs">
+      <button class="cat-tab active" onclick="filterCat('all', this)">All terms</button>
+      <button class="cat-tab" onclick="filterCat('foundation', this)">🏗️ Foundation</button>
+      <button class="cat-tab" onclick="filterCat('version', this)">🕰 Version Control</button>
+      <button class="cat-tab" onclick="filterCat('styling', this)">🎨 Styling</button>
+      <button class="cat-tab" onclick="filterCat('framework', this)">⚛️ Frameworks</button>
+      <button class="cat-tab" onclick="filterCat('tools', this)">🛠 Tools & Workflow</button>
+      <button class="cat-tab" onclick="filterCat('ai', this)">🤖 AI & Claude</button>
+    </div>
+
+    <div class="glossary-grid" id="glossaryGrid"></div>
+    <div class="expand-panel" id="expandPanel">
+      <div class="panel-header">
+        <div class="panel-title-block">
+          <div class="panel-emoji" id="panelEmoji"></div>
+          <div class="panel-title" id="panelTitle"></div>
+          <div class="panel-tagline" id="panelTagline"></div>
+        </div>
+        <button class="close-btn" onclick="closePanel()">Close ✕</button>
+      </div>
+      <div class="panel-sections" id="panelSections"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ④b BEFORE YOU START -->
+<section id="s3b">
+  <div class="chapter-inner" style="position:relative;">
+    <span class="chapter-num">03.5</span>
+    <p class="section-label">Chapter 03.5 — Before You Begin</p>
+    <h2 class="chapter-title">The setup that saves<br><em style="font-style:italic;font-family:'Fraunces',serif;">everything.</em></h2>
+    <p class="chapter-intro">The single biggest mistake I made early on: starting Claude sessions with zero safety net. One long conversation, one error, one "context window full" message — and everything was gone. Here's what to do before you even type your first prompt.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px;">
+      <div style="background:var(--card-bg);border-radius:18px;padding:28px;border-left:4px solid var(--accent);">
+        <p style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin-bottom:12px;">The problem</p>
+        <p style="font-size:0.95rem;line-height:1.75;color:var(--ink);">Claude sessions have a context window — a memory limit. When you hit it, Claude starts forgetting earlier parts of the conversation. If you've been building something across a long session and Claude throws an error or loses context, you could lose hours of work with no way to recover it.</p>
+        <p style="font-size:0.85rem;color:var(--muted);line-height:1.65;margin-top:12px;font-style:italic;">I once spent 3 hours on a session. Claude hit its limit, got confused, and started contradicting its own earlier code. I had nothing saved. I had to start over.</p>
+      </div>
+      <div style="background:var(--card-bg);border-radius:18px;padding:28px;border-left:4px solid var(--accent3);">
+        <p style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent3);margin-bottom:12px;">The solution</p>
+        <p style="font-size:0.95rem;line-height:1.75;color:var(--ink);">Set up a GitHub repository before your first session. Every time Claude produces working code, commit it. If Claude loses context or the session breaks, you can paste your saved files back in and continue from exactly where you left off. Your work is never lost.</p>
+        <p style="font-size:0.85rem;color:var(--muted);line-height:1.65;margin-top:12px;font-style:italic;">Think of it like saving your Figma file constantly. Except in code, saving = committing to GitHub.</p>
+      </div>
+    </div>
+
+    <h3 style="font-family:'Fraunces',serif;font-size:1.6rem;font-weight:300;margin-bottom:24px;">The pre-session checklist</h3>
+
+    <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:40px;">
+      <div style="display:flex;gap:20px;align-items:flex-start;background:var(--card-bg);border-radius:14px;padding:20px 24px;">
+        <span style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--accent);min-width:28px;">01</span>
+        <div>
+          <p style="font-weight:700;font-size:0.95rem;margin-bottom:5px;">Create a GitHub account (if you haven't)</p>
+          <p style="font-size:0.88rem;color:var(--muted);line-height:1.65;">Go to github.com and sign up. It's free. This is where all your projects will live online — safe, backed up, and accessible from any computer. Think of it as your code's iCloud.</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:20px;align-items:flex-start;background:var(--card-bg);border-radius:14px;padding:20px 24px;">
+        <span style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--accent);min-width:28px;">02</span>
+        <div>
+          <p style="font-weight:700;font-size:0.95rem;margin-bottom:5px;">Create a new repository for your project</p>
+          <p style="font-size:0.88rem;color:var(--muted);line-height:1.65;">On GitHub, click "New repository." Give it a clear name (e.g. <span style="font-family:'DM Mono',monospace;font-size:0.82rem;background:var(--cream);padding:2px 6px;border-radius:4px;">portfolio-site</span> or <span style="font-family:'DM Mono',monospace;font-size:0.82rem;background:var(--cream);padding:2px 6px;border-radius:4px;">design-system</span>). Set it to Private if the work is confidential. Click Create — that's your project folder, now with superpowers.</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:20px;align-items:flex-start;background:var(--card-bg);border-radius:14px;padding:20px 24px;">
+        <span style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--accent);min-width:28px;">03</span>
+        <div>
+          <p style="font-weight:700;font-size:0.95rem;margin-bottom:5px;">Tell Claude about your repo at the start of every session</p>
+          <p style="font-size:0.88rem;color:var(--muted);line-height:1.65;">Start your Claude session by saying: <em style="color:var(--ink);">"I'm working on a project stored at github.com/yourusername/your-repo. Please commit any working code to this repo as we go."</em> Claude can connect to GitHub and commit directly — no terminal needed.</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:20px;align-items:flex-start;background:var(--card-bg);border-radius:14px;padding:20px 24px;">
+        <span style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--accent);min-width:28px;">04</span>
+        <div>
+          <p style="font-weight:700;font-size:0.95rem;margin-bottom:5px;">Commit after every working milestone</p>
+          <p style="font-size:0.88rem;color:var(--muted);line-height:1.65;">Every time Claude finishes something that works — a component, a page, a feature — ask it to commit. Say: <em style="color:var(--ink);">"This is working well. Please commit everything with the message 'Add product card component'."</em> That's your save point.</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:20px;align-items:flex-start;background:var(--card-bg);border-radius:14px;padding:20px 24px;">
+        <span style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--accent);min-width:28px;">05</span>
+        <div>
+          <p style="font-weight:700;font-size:0.95rem;margin-bottom:5px;">If Claude loses context or something breaks — don't panic</p>
+          <p style="font-size:0.88rem;color:var(--muted);line-height:1.65;">Open your GitHub repo, find the last commit that was working, and copy the files. Start a new Claude session and paste in: <em style="color:var(--ink);">"Here is where we left off: [paste code]. Continue from here."</em> You lose nothing. You just continue.</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:var(--ink);border-radius:18px;padding:28px 32px;">
+      <p style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:rgba(245,240,232,0.35);margin-bottom:16px;">What to say when starting a new session</p>
+      <div style="background:rgba(232,93,38,0.12);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:16px 20px;font-family:'DM Mono',monospace;font-size:0.82rem;color:rgba(245,240,232,0.8);line-height:1.8;">"I'm working on [project name]. The code is saved at github.com/[username]/[repo]. Here's what we've built so far: [paste your latest code or describe what exists]. Today I want to [describe today's goal]. Please commit working changes to the repo as we go."</div>
+      <p style="font-size:0.82rem;color:rgba(245,240,232,0.4);margin-top:14px;line-height:1.65;">This one paragraph gives Claude everything it needs: context of the project, access to the history, a clear goal, and a safety instruction. It's the designer brief equivalent for a coding session.</p>
+    </div>
+
+    <div style="margin-top:28px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+      <div style="background:var(--card-bg);border-radius:14px;padding:18px 20px;">
+        <p style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Session gets too long?</p>
+        <p style="font-size:0.85rem;line-height:1.6;color:var(--ink);">Ask Claude to write a "handoff summary" — a brief of everything built so far. Paste this into the new session. Claude picks up exactly where it left off.</p>
+      </div>
+      <div style="background:var(--card-bg);border-radius:14px;padding:18px 20px;">
+        <p style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Claude gives a confusing error?</p>
+        <p style="font-size:0.85rem;line-height:1.6;color:var(--ink);">Copy the entire error message and paste it in. Say "fix this." Claude almost always knows exactly what went wrong and will resolve it in seconds.</p>
+      </div>
+      <div style="background:var(--card-bg);border-radius:14px;padding:18px 20px;">
+        <p style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Claude starts contradicting itself?</p>
+        <p style="font-size:0.85rem;line-height:1.6;color:var(--ink);">This means the context window is full. Start a fresh session, paste in your saved GitHub code, and continue. Fresh context = cleaner thinking from Claude.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ⑤ HOW CLAUDE THINKS -->
+<section id="s4" style="background:var(--ink)!important;color:var(--paper);">
+  <div class="chapter-inner" style="position:relative;">
+    <span class="chapter-num" style="color:white;">04</span>
+    <p class="section-label">Chapter 04 — Inside Claude</p>
+    <h2 class="chapter-title" style="color:var(--paper);">What is Claude<br><em style="font-style:italic;font-family:'Fraunces',serif;color:var(--accent);">actually doing?</em></h2>
+    <p style="font-size:1rem;line-height:1.75;color:rgba(245,240,232,0.6);max-width:600px;margin-bottom:44px;">When you send a prompt, a lot happens before you see a response. Here's the mental model that helped me stop feeling like I was just "pressing a button."</p>
+
+    <div class="brain-grid">
+      <div>
+        <div class="brain-step">
+          <span class="brain-num">1</span>
+          <div class="brain-text">
+            <h4 style="color:var(--paper)">It reads your brief</h4>
+            <p>Claude processes your entire message — your words, your tone, the context of the conversation. Like briefing a designer: the more detail you give, the better the result.</p>
+          </div>
+        </div>
+        <div class="brain-step">
+          <span class="brain-num">2</span>
+          <div class="brain-text">
+            <h4 style="color:var(--paper)">It decides what to make</h4>
+            <p>Based on your prompt, Claude decides: is this an HTML file? A React component? A bash command? It chooses the right tool for the job — like deciding whether a design needs a frame or a component.</p>
+          </div>
+        </div>
+        <div class="brain-step">
+          <span class="brain-num">3</span>
+          <div class="brain-text">
+            <h4 style="color:var(--paper)">It writes the code</h4>
+            <p>Claude generates code token by token — like a designer placing objects, adjusting spacing, picking colours — but in text. It applies conventions, best practices, and the constraints you gave it.</p>
+          </div>
+        </div>
+        <div class="brain-step">
+          <span class="brain-num">4</span>
+          <div class="brain-text">
+            <h4 style="color:var(--paper)">It explains and checks in</h4>
+            <p>Claude almost always tells you what it did and asks if you want changes. This is the equivalent of a designer presenting a frame and asking for feedback. Treat it like a collaboration, not a vending machine.</p>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="chat-mock">
+          <p class="chat-header">Real session — designing a card component</p>
+          <div class="bubble user">Make a product card component — image at top, title, price, and an 'Add to bag' button. Keep it minimal, lots of white space. Our brand colour is #e85d26</div>
+          <div class="bubble claude">Done. I've created a <code>ProductCard</code> React component. It accepts <code>image</code>, <code>title</code>, and <code>price</code> as props so you can reuse it for any product. The button uses your brand orange with a hover state. Should I add a loading skeleton state for when the image is fetching?</div>
+          <div class="bubble user">Yes! And can we add a 'sold out' variant?</div>
+          <div class="bubble claude">Added both. The skeleton uses an animated shimmer effect. For sold out: pass <code>soldOut={true}</code> — the button greys out and shows "Sold out" text. I've also disabled the click event so there's no accidental add-to-bag.</div>
+          <div class="bubble user">The spacing between the title and price feels too tight</div>
+          <div class="bubble claude">Increased the gap from 4px to 12px in the component. I also nudged the overall card padding from 16px to 20px — it felt cramped in context. Let me know if you want it back.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:52px;">
+      <p style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(245,240,232,0.3);margin-bottom:20px;">How a prompt becomes a live website</p>
+      <div style="display:flex;flex-direction:column;gap:0;margin-bottom:28px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="flow-box" style="flex:1;">Your prompt</div>
+          <span style="color:rgba(245,240,232,0.4);font-size:1.1rem;flex-shrink:0;">→</span>
+          <div class="flow-box accent" style="flex:1;">Claude writes code</div>
+          <span style="color:rgba(245,240,232,0.4);font-size:1.1rem;flex-shrink:0;">→</span>
+          <div class="flow-box" style="flex:1;">Files on your computer</div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;padding-right:0;">
+          <div style="width:calc(33.33% );display:flex;justify-content:center;padding:4px 0;">
+            <span style="color:rgba(245,240,232,0.4);font-size:1.1rem;">↓</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="flow-box final" style="flex:1;">Live on the internet</div>
+          <span style="color:rgba(245,240,232,0.4);font-size:1.1rem;flex-shrink:0;">←</span>
+          <div class="flow-box" style="flex:1;">Push to GitHub</div>
+          <span style="color:rgba(245,240,232,0.4);font-size:1.1rem;flex-shrink:0;">←</span>
+          <div class="flow-box" style="flex:1;">Git commit</div>
+        </div>
+      </div>
+      <p class="flow-caption">Each step has a name. Claude can do all of them. Now you know what it's doing at each stage.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ⑥ QUIZ -->
+<section id="s5">
+  <div class="chapter-inner" style="position:relative;max-width:680px;">
+    <span class="chapter-num">05</span>
+    <p class="section-label">Chapter 05 — Quick Check</p>
+    <h2 class="chapter-title">Test what landed.</h2>
+    <p class="chapter-intro">8 questions. All framed in designer language. No developer jargon in the answers.</p>
+    <div class="quiz-wrap" id="quizWrap">
+      <p class="quiz-meta" id="quizMeta"></p>
+      <p class="quiz-q" id="quizQ"></p>
+      <div class="quiz-options" id="quizOpts"></div>
+      <div class="quiz-result" id="quizResult"></div>
+      <button class="quiz-next" id="quizNext" onclick="nextQ()">Next question →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ⑦ LESSONS -->
+<section id="s6">
+  <div class="chapter-inner" style="position:relative;">
+    <span class="chapter-num">06</span>
+    <p class="section-label">Chapter 06 — Real Lessons</p>
+    <h2 class="chapter-title">What actually changes<br>when you understand this.</h2>
+    <ul class="lessons-list">
+      <li class="lesson-item">
+        <span class="lesson-num">1</span>
+        <div class="lesson-body">
+          <p class="lesson-title">Your prompts get dramatically better</p>
+          <p class="lesson-text">When you know what a component, a prop, or a CSS variable is — you can ask for exactly what you want. "Make a Button component that accepts a variant prop of 'solid' or 'ghost'" gets you infinitely better results than "make a button but also a transparent one."</p>
+        </div>
+      </li>
+      <li class="lesson-item">
+        <span class="lesson-num">2</span>
+        <div class="lesson-body">
+          <p class="lesson-title">You stop being scared of error messages</p>
+          <p class="lesson-text">Error messages are just code's way of saying "something's missing or wrong here." You don't need to read them — just paste them directly into Claude and say "fix this." But knowing terms like 'undefined variable' or 'missing import' helps you understand the conversation.</p>
+        </div>
+      </li>
+      <li class="lesson-item">
+        <span class="lesson-num">3</span>
+        <div class="lesson-body">
+          <p class="lesson-title">You become a real design-dev bridge</p>
+          <p class="lesson-text">Developers respect designers who speak some code. Not because you need to write it — but because you can give accurate feedback: "the padding on that component needs to be a multiple of 8" or "that should be a prop, not hardcoded."</p>
+        </div>
+      </li>
+      <li class="lesson-item">
+        <span class="lesson-num">4</span>
+        <div class="lesson-body">
+          <p class="lesson-title">Git is just Figma version history — take it seriously</p>
+          <p class="lesson-text">You would never not save your Figma file. The equivalent in code is committing. When Claude makes commits, those are your save points. A good commit message is like a good Figma frame name — it's for future-you.</p>
+        </div>
+      </li>
+      <li class="lesson-item">
+        <span class="lesson-num">5</span>
+        <div class="lesson-body">
+          <p class="lesson-title">Claude works best as a collaborator, not an oracle</p>
+          <p class="lesson-text">The best sessions I've had are when I treat Claude like a junior dev on a team: give context, give constraints, give feedback. "This spacing is off" or "the hover state should feel more playful" — your design language translates directly.</p>
+        </div>
+      </li>
+      <li class="lesson-item">
+        <span class="lesson-num">6</span>
+        <div class="lesson-body">
+          <p class="lesson-title">Your visual eye is a superpower in code</p>
+          <p class="lesson-text">Most developers don't naturally care about 4px vs 8px of margin. You do. That instinct — noticing when spacing feels off, when a font-weight is too heavy, when a transition is too slow — is incredibly valuable and not something code automatically provides.</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- ⑧ ENDING -->
+<section class="ending" id="s7">
+  <h2>You didn't learn<br>to code. You learned<br><em style="font-style:italic;font-family:'Fraunces',serif;">to speak it.</em></h2>
+  <p>This entire presentation was built by prompting Claude. No HTML was written by hand. The only skill required was knowing what to ask for.</p>
+</section>
+
+<script>
+const glossaryData = [
+  {
+    emoji: "🏗️", term: "HTML", cat: "foundation",
+    short: "The bones of every web page",
+    tagline: "Structure • Skeleton • Content",
+    analogy: "If a webpage were a building, HTML is the architecture — the walls, floors, and rooms. It gives everything structure. CSS is the interior design. JavaScript is the plumbing and electrics.",
+    what: "HTML (HyperText Markup Language) uses tags to describe content. <h1> is a big heading. <p> is a paragraph. <button> is a button. <img> is an image. Browsers read HTML and turn it into what you see on screen.",
+    looks: `<h1>Welcome</h1>\n<p>This is a paragraph.</p>\n<button>Click me</button>`,
+    designer: "Think of HTML tags like layer types in Figma — an <h1> is like a 'Heading' text layer, a <div> is like a Frame, a <button> is like an interactive component. The hierarchy of HTML tags mirrors Figma's layers panel.",
+    claude: "\"I've structured the page using semantic HTML — a <header>, <main>, and <footer>. Each section uses the appropriate heading levels for accessibility.\"",
+    extras: ["Every website ever made starts with HTML", "Claude generates HTML automatically when you ask it to build anything for the browser", "HTML alone has no style — it just defines what things are, not what they look like"]
+  },
+  {
+    emoji: "🎨", term: "CSS", cat: "styling",
+    short: "The style panel for the entire web",
+    tagline: "Appearance • Layout • Animation",
+    analogy: "CSS is Figma's design panel, but for the whole web. It controls colour, font, size, spacing, layout, and even animation. Every visual thing you see on a website is CSS at work.",
+    what: "CSS (Cascading Style Sheets) lets you write rules that apply to HTML elements. 'Every button should be orange, 16px font, rounded corners.' Those rules can target single elements or entire categories of elements at once.",
+    looks: `button {\n  background: #e85d26;\n  border-radius: 999px;\n  font-size: 16px;\n  padding: 12px 24px;\n}`,
+    designer: "CSS properties map almost directly to Figma properties. color = fill on text. background = fill on a frame. border-radius = corner radius. padding = auto-layout padding. gap = spacing between items. You already understand all of this.",
+    claude: "\"I've added CSS transitions so the hover state feels smooth — 200ms ease. The card uses a CSS Grid layout so the columns resize automatically on smaller screens.\"",
+    extras: ["Flexbox and Grid in CSS are like Auto-layout in Figma — Claude uses these constantly", "CSS Variables work exactly like Figma Variables — set once, used everywhere", "Modern CSS can do animations that used to require JavaScript"]
+  },
+  {
+    emoji: "⚡", term: "JavaScript", cat: "foundation",
+    short: "What makes the web move and think",
+    tagline: "Interaction • Logic • Data",
+    analogy: "If Figma's prototype mode could actually run real logic — calculate things, fetch data, remember what you clicked across sessions — that would be JavaScript. It's the brain of the web.",
+    what: "JavaScript (JS) runs in the browser and makes pages interactive. It responds to clicks, updates content without reloading the page, fetches data from external sources, does calculations, and remembers state. React is built entirely on JavaScript.",
+    looks: `button.addEventListener('click', () => {\n  count = count + 1;\n  display.textContent = count;\n});`,
+    designer: "Figma prototypes can fake interactions — hover states, click-throughs. JavaScript makes those same things real. When Claude writes a dropdown that opens, a form that validates, or a filter that sorts results — that's all JavaScript.",
+    claude: "\"I've added a JavaScript event listener on the button. When clicked, it updates the cart count in state and triggers the animation. No page reload needed.\"",
+    extras: ["TypeScript is JavaScript with stricter rules — like a design system that enforces correct usage", "Node.js lets JavaScript run on a server, not just in a browser", "React, Vue, Angular — all JavaScript frameworks"]
+  },
+  {
+    emoji: "⚛️", term: "React", cat: "framework",
+    short: "Figma components — but interactive and real",
+    tagline: "Components • State • Reusability",
+    analogy: "React is basically Figma components that can think. A Button component in React knows its own state — is it hovered? Was it clicked? Is it loading? — and updates its own appearance based on what's happening.",
+    what: "React is a JavaScript library for building UIs from components. Each component is a self-contained piece of UI with its own logic and appearance. Components accept 'props' (like overrides in Figma) to customise them, and manage 'state' (like interactive states in Figma, but real).",
+    looks: `function Button({ label, variant }) {\n  return (\n    <button className={variant === 'ghost'\n      ? 'btn-ghost' : 'btn-solid'}>\n      {label}\n    </button>\n  );\n}`,
+    designer: "When you build a design system in Figma — a Button component with Solid/Ghost/Disabled variants — React is the exact equivalent in code. Same mental model, same idea of reusable, self-contained pieces with customisable overrides.",
+    claude: "\"I've created a reusable <Card> component. Pass it a title, description, and image prop and it handles the layout automatically. I've also added loading and error states.\"",
+    extras: ["'JSX' is React's way of mixing HTML-like syntax into JavaScript — it's what makes components look like familiar markup", "useState is how React components remember things (like whether a menu is open)", "Next.js is the most popular framework built on top of React"]
+  },
+  {
+    emoji: "🌊", term: "Tailwind", cat: "styling",
+    short: "Design tokens as shorthand class names",
+    tagline: "Utility-first • Systematic • Fast",
+    analogy: "Imagine if in Figma, instead of opening the spacing panel and typing 16, you just wrote p-4 on a layer and it applied 16px padding instantly. That's Tailwind — a pre-built system of tiny utility classes that do exactly one thing each.",
+    what: "Tailwind is a CSS framework. Instead of writing custom CSS rules, you apply small utility classes directly in your HTML or JSX. Each class does one specific thing: text-orange-500 = orange text. font-bold = bold font. rounded-full = pill shape. flex = flexbox layout.",
+    looks: `<button class="bg-orange-500 text-white\n  font-bold rounded-full px-6 py-3\n  hover:bg-orange-600 transition">\n  Add to bag\n</button>`,
+    designer: "Tailwind enforces a design system by default. All spacing is on a 4px grid (4, 8, 12, 16, 20, 24...). Colours are pre-defined with consistent shades (100-900). It's like building in a Figma file that already has your 8pt grid and colour styles set up.",
+    claude: "\"I'm using Tailwind utility classes throughout. The spacing scale uses multiples of 4 — p-4 is 16px, p-6 is 24px. The colour names map to shades: orange-500 is your brand colour.\"",
+    extras: ["Tailwind's spacing scale (4, 8, 12, 16px) is the developer equivalent of an 8pt grid", "You can customise the entire system in tailwind.config.js — like editing your Figma variables", "PurgeCSS removes any Tailwind classes you didn't use before publishing, keeping file sizes small"]
+  },
+  {
+    emoji: "🐙", term: "Git", cat: "version",
+    short: "Version history — but you name each save",
+    tagline: "History • Commits • Branches",
+    analogy: "Git is Figma's version history if you could name every single auto-save with a note explaining what changed. And if you could work in parallel 'branches' — like having two copies of a file where you try different designs — without affecting each other.",
+    what: "Git is a version control system. Every meaningful change gets saved as a 'commit' — a named snapshot with a message. You can rewind to any commit, branch off to try something risky, and merge branches back together when the work is done.",
+    looks: `git add .\ngit commit -m "Added ghost button variant"\ngit push origin main`,
+    designer: "Commit messages are like naming your Figma frames well. 'Fixed spacing on mobile nav' tells future-you exactly what changed and why. The Git log is a timeline of every decision ever made in a codebase.",
+    claude: "\"I've made three commits: one for the component structure, one for the styles, and one for the tests. Each commit is focused so you can revert just one part if needed.\"",
+    extras: ["'git clone' = downloading a project folder to your computer, with all its history", "'git pull' = getting the latest version from the shared repo (like syncing a Figma file)", "Conflicts happen when two people change the same thing — Git asks you to choose which version to keep"]
+  },
+  {
+    emoji: "🐱", term: "GitHub", cat: "version",
+    short: "Figma Community — but for code projects",
+    tagline: "Cloud storage • Collaboration • Review",
+    analogy: "GitHub is like Figma's shared library combined with Google Drive combined with a review/commenting system — all for code. It's where Git repositories (project folders) live online so your whole team can access them.",
+    what: "GitHub hosts Git repositories online. It shows the history of every commit, lets teams review proposed changes through 'pull requests' (like leaving comments on a Figma frame before it goes live), and tracks bugs and features through 'issues'.",
+    looks: `Repository: company/design-system\nBranches: main, feature/new-button\nOpen PRs: 3 changes awaiting review\nIssues: 12 open, 47 closed`,
+    designer: "A pull request (PR) is a formal request to merge code changes into the main project. The team reviews it, leaves comments, and approves or requests changes — exactly like a design review in Figma before something gets handed off.",
+    claude: "\"I've pushed the changes to the 'feature/card-component' branch on GitHub. You can open a pull request from there to review the code before merging it into main.\"",
+    extras: ["GitHub Actions can automatically run tests, build, or deploy your site whenever code is pushed", "The README.md file is the first thing people see in a repo — like a project brief for new collaborators", "Forking a repo means making your own copy to experiment with — like duplicating a Figma file"]
+  },
+  {
+    emoji: "📦", term: "npm", cat: "tools",
+    short: "The plugin store for code projects",
+    tagline: "Packages • Dependencies • Installation",
+    analogy: "When you need a Figma plugin — a date picker, icon set, or annotation tool — you go to the Figma plugin store, install it, and it works. npm (Node Package Manager) is the same: a massive registry of pre-built code that you install into your project.",
+    what: "npm hosts over 2 million packages — pre-written code for almost any task. Need date formatting? Install date-fns. Need animation? Install framer-motion. Need authentication? There's a package for that. Your project's list of installed packages lives in a file called package.json.",
+    looks: `npm install framer-motion\nnpm install date-fns\nnpm install @radix-ui/react-dialog`,
+    designer: "The package.json file is like a list of all the plugins your Figma file depends on. If you share your project with a colleague and they run 'npm install', it downloads all the same packages — like syncing all the plugins someone needs to open your file.",
+    claude: "\"I've added framer-motion to handle the animation — run 'npm install' first and it'll pull down the package. I've kept the dependencies minimal so the project stays lightweight.\"",
+    extras: ["'node_modules' is the folder where all installed packages live — it's huge and should never be shared (that's what package.json is for)", "npx lets you run a package without installing it permanently", "Yarn and pnpm are alternatives to npm that do the same job, just faster"]
+  },
+  {
+    emoji: "🧩", term: "Components", cat: "framework",
+    short: "Exact same concept as Figma components",
+    tagline: "Reusable • Self-contained • Configurable",
+    analogy: "You already live in component-land. A code component is literally the same idea as a Figma master component — a reusable, self-contained piece of UI. Build it once, use it everywhere, update it in one place and it updates everywhere.",
+    what: "In React, a component is a JavaScript function that returns UI. You pass it props (like Figma overrides) to customise it per instance. <Button label='Add to bag' variant='solid' /> is saying: give me the Button component, with this label, in this style.",
+    looks: `<Button label="Add to bag" variant="solid" />\n<Button label="Save for later" variant="ghost" />\n<Button label="Sold out" disabled={true} />`,
+    designer: "Props are overrides. A Button component might have: label (text content), variant (solid/ghost/destructive), size (sm/md/lg), disabled (boolean). That maps exactly to how you'd set up variants and properties in a Figma component.",
+    claude: "\"I've broken the UI into three components: <ProductCard>, <PriceTag>, and <AddToCartButton>. Each handles its own logic. The ProductCard accepts image, title, price, and soldOut as props.\"",
+    extras: ["Atomic Design (atoms, molecules, organisms) is a popular system for organising components — it maps well to Figma's own component organisation thinking", "A 'prop' is short for property — the same word Figma uses in the Component Properties panel", "Components can contain other components, just like Figma components can be nested"]
+  },
+  {
+    emoji: "🚀", term: "Deploy", cat: "tools",
+    short: "Publishing your site to the internet",
+    tagline: "Live URL • Server • Production",
+    analogy: "When you're done designing and you share a public Figma view link — that's like deploying. Deploying means taking your code from 'works on my computer' to 'anyone in the world can visit this URL.'",
+    what: "Deployment puts your project on a server with a real URL. Services like Vercel and Netlify watch your GitHub repo — whenever you push new code, they automatically rebuild and deploy the updated site. The process usually takes under a minute.",
+    looks: `git push origin main\n→ Vercel detects new commit\n→ Builds the project\n→ Deploys to mysite.vercel.app\n→ Done in 45 seconds`,
+    designer: "There's usually a 'production' environment (the live site everyone sees) and a 'preview' environment (a staging link, like a Figma share link for review). Every pull request on GitHub can automatically generate a preview URL for review.",
+    claude: "\"I've configured Vercel deployment. Every push to main will auto-deploy. Pull requests get their own preview URL so you can review changes before they go live — similar to a Figma share link for the branch.\"",
+    extras: ["'Environment variables' control things that differ between local/staging/production — like API keys or database URLs", "A 'build' is the process of turning your source code into the optimised files that get served to users", "CDN (Content Delivery Network) serves your files from servers close to the user, making it faster worldwide"]
+  },
+  {
+    emoji: "🖥️", term: "Terminal", cat: "tools",
+    short: "Figma's command bar — but for your whole computer",
+    tagline: "Commands • Shell • CLI",
+    analogy: "The Terminal is like Figma's Quick Actions bar (Cmd+/) — but instead of searching for Figma functions, you're typing commands that control your computer, your files, and your code. It looks intimidating. It's really just typing instructions.",
+    what: "The Terminal (also called Command Line or Shell) lets you control your computer by typing text commands instead of clicking. You navigate folders, run code, install packages, start servers, and run Git commands — all through text.",
+    looks: `cd my-project\nnpm install\nnpm run dev\n→ Server running at localhost:3000`,
+    designer: "The most common Terminal commands you'll see Claude use: cd = navigate to a folder (like clicking into a folder in Finder), npm install = install packages, npm run dev = start the local preview server, git commands = version control.",
+    claude: "\"Open the Terminal, navigate to the project folder with 'cd my-project', and run 'npm run dev'. That starts the local server so you can preview the site at localhost:3000 in your browser.\"",
+    extras: ["You never need to memorise Terminal commands — Claude will always tell you exactly what to type", "iTerm2 (Mac) and Windows Terminal are popular alternatives to the built-in Terminal", "A 'script' in package.json is a shortcut command — 'npm run build' might trigger a long chain of operations"]
+  },
+  {
+    emoji: "🏠", term: "localhost", cat: "tools",
+    short: "Your computer pretending to be the internet",
+    tagline: "Local server • Preview • Development",
+    analogy: "localhost is like Figma's presentation mode — a preview of your design that only you can see on your screen right now. When Claude starts a local server, your computer temporarily becomes a tiny website host just for you.",
+    what: "localhost refers to your own computer, addressed as if it were a web server. When you run 'npm run dev', it starts a local development server and gives you a URL like localhost:3000 that only works in your browser, on your machine.",
+    looks: `npm run dev\n→ Ready at http://localhost:3000\n\n(Only you can see this URL)`,
+    designer: "The number after the colon (3000, 8080, 5173) is the 'port' — like different channels on the same TV. If you have two projects running locally, they each get a different port so they don't clash.",
+    claude: "\"Start the dev server with 'npm run dev' — open localhost:3000 in your browser to see your changes live. It hot-reloads, so every time you save a file, the browser updates instantly without refreshing.\"",
+    extras: ["'Hot reload' means the browser updates instantly when you save a file — like Figma's live preview but for real code", "localhost:3000 only exists while the dev server is running — closing the Terminal stops it", "Nothing you do on localhost affects the live site — it's a completely safe sandbox"]
+  },
+  {
+    emoji: "📝", term: "VS Code", cat: "tools",
+    short: "The Figma of writing code",
+    tagline: "Code editor • Extensions • Workspace",
+    analogy: "VS Code (Visual Studio Code) is to developers what Figma is to designers. It's the main tool where code is written, files are managed, and extensions are added to customise the workflow. It's free, made by Microsoft, and used by almost everyone.",
+    what: "VS Code is a code editor with syntax highlighting (code is colour-coded), autocomplete, error detection, a built-in Terminal, and thousands of extensions. It's where Claude's generated code lives as files that you can open, read, and edit.",
+    looks: `Extensions installed:\n- Prettier (auto-formats code)\n- ESLint (catches errors)\n- Tailwind IntelliSense\n- GitHub Copilot`,
+    designer: "If Figma has plugins, VS Code has extensions. Prettier is like Figma's 'tidy up' function — it automatically formats code neatly. ESLint is like a design linter — it catches mistakes and inconsistencies before they become problems.",
+    claude: "\"I'd recommend installing the Tailwind IntelliSense extension in VS Code — it autocompletes class names as you type, which makes editing my code much faster. Prettier will also auto-format everything on save.\"",
+    extras: ["The file explorer sidebar in VS Code is like Figma's Layers panel — it shows all your project files in a tree", "Cmd+P in VS Code opens a file finder — exactly like Cmd+P in Figma", "Most developers keep VS Code and a browser side-by-side, refreshing constantly — the designer equivalent of Figma and a mirror device"]
+  },
+  {
+    emoji: "🔌", term: "API", cat: "foundation",
+    short: "A request form between two services",
+    tagline: "Data exchange • Endpoints • Requests",
+    analogy: "An API is like a waiter in a restaurant. You (the app) sit at the table. The kitchen (Google Maps, a payment system, a database) has what you need. The API is the waiter — it takes your order in a specific format, goes to the kitchen, and brings back exactly what you asked for.",
+    what: "API stands for Application Programming Interface. It's how different software systems communicate. Your app sends a request to an API endpoint (a URL that accepts requests) with specific data. The API processes it and sends back a response — usually in JSON format.",
+    looks: `Fetch weather for London:\nGET api.weather.com/v1/current?city=London\n\nResponse:\n{ "temp": 14, "condition": "Cloudy" }`,
+    designer: "Every time an app shows live data — weather, prices, user profiles, maps — it's making an API call. Claude's entire intelligence is accessible via an API: you send it a message, it sends back a response. When developers build apps powered by Claude, they're calling Anthropic's API.",
+    claude: "\"I've connected the component to the product API. When the page loads, it fetches the latest price and stock status in real time. If the API is slow, the loading skeleton shows while it waits.\"",
+    extras: ["REST and GraphQL are two styles of API — REST is like filling in a fixed form, GraphQL is like a custom query where you ask for exactly what you need", "An API key is a password that proves your app is allowed to use that API — treat it like a password", "Rate limiting means an API will only let you make a certain number of requests per hour/day"]
+  },
+  {
+    emoji: "🏢", term: "Frontend vs Backend", cat: "foundation",
+    short: "What you see vs. what powers it",
+    tagline: "Client • Server • Full-stack",
+    analogy: "Think of a restaurant. The frontend is everything the customer sees and touches — the menu, the decor, the table, the waiter. The backend is everything happening in the kitchen — the recipes, the storage, the accounting system. You need both, but they're completely separate worlds.",
+    what: "Frontend is everything that runs in the user's browser — the HTML, CSS, JavaScript, React components. It's what the user sees and interacts with. Backend is the server-side code — it handles data storage (databases), user authentication, payment processing, and business logic. Claude can write both.",
+    looks: `Frontend (your browser):\n→ React components\n→ CSS styles\n→ User interactions\n\nBackend (a server):\n→ Database queries\n→ User authentication\n→ Payment processing`,
+    designer: "As a designer, you've always worked on the frontend — that's the visual, interactive layer. But great products need a backend to store user data, handle logins, process payments. 'Full-stack' means someone works on both sides.",
+    claude: "\"This feature touches both frontend and backend. I'll build the React component on the frontend and a simple API endpoint on the backend using Next.js API routes — so the form data gets saved to the database securely.\"",
+    extras: ["Next.js is popular because it handles both frontend and backend in one project — so Claude can build the whole thing", "A 'full-stack' developer works on both frontend and backend — increasingly, Claude makes designers feel full-stack", "The browser never directly touches the database — the backend sits in between as a secure layer"]
+  },
+  {
+    emoji: "📐", term: "TypeScript", cat: "framework",
+    short: "JavaScript with a design system built in",
+    tagline: "Types • Safety • Autocomplete",
+    analogy: "TypeScript is JavaScript with a strict design system enforced on top. In Figma, you might set up components where certain properties only accept specific values — a variant can only be 'solid', 'ghost', or 'destructive'. TypeScript does this for code: it defines what types of data each function can accept and return.",
+    what: "TypeScript adds a type system to JavaScript. You declare that a function expects a string, not a number, and TypeScript warns you (before the code runs) if you accidentally pass the wrong thing. It catches entire categories of bugs that would otherwise only appear in production.",
+    looks: `type ButtonProps = {\n  label: string;\n  variant: 'solid' | 'ghost';\n  disabled?: boolean;\n};\n\nfunction Button({ label, variant }: ButtonProps) {...}`,
+    designer: "If someone passes a number where a string is expected, TypeScript shouts at them in the editor — before anything breaks. It's like a design linter: enforces correct usage of every component in the system.",
+    claude: "\"I'm using TypeScript for this component. I've defined the Props type so the component only accepts the values we've agreed on — passing an invalid variant will show a red underline immediately in VS Code.\"",
+    extras: [".ts files are TypeScript, .tsx files are TypeScript with JSX (React)", "TypeScript doesn't change how your app behaves — it's purely a developer tool that gets stripped out before deployment", "Most new projects start with TypeScript by default — it's become the standard"]
+  },
+  {
+    emoji: "📁", term: "Repository", cat: "version",
+    short: "Your project folder, fully version-tracked",
+    tagline: "Folder • History • Codebase",
+    analogy: "A repository is your project folder in Figma — everything for one project, all in one place. The difference: a Git repo remembers every single change ever made to every file, who made it, when, and a note explaining why.",
+    what: "A repository (repo) is a folder that Git is tracking. It contains all source code, configuration files, assets, and the complete history of changes. On GitHub, a repo has a feed showing all commits, open pull requests, issues (bug reports and feature requests), and contributor activity.",
+    looks: `my-project/\n├── src/\n│   ├── components/\n│   ├── pages/\n│   └── styles/\n├── public/\n├── package.json\n└── README.md`,
+    designer: "The README.md is the project brief — it explains what the project is, how to set it up, and how to contribute. Well-maintained READMEs are like well-named Figma files: a gift to everyone who comes after you.",
+    claude: "\"I've organised the repository with components in /src/components, pages in /src/pages, and all global styles in /src/styles. The structure follows the standard Next.js convention so it'll feel familiar to any developer joining the project.\"",
+    extras: ["Cloning a repo = downloading a full copy to your computer", "Forking = making your own copy of someone else's repo to experiment with", "The .gitignore file lists things Git should never track — like passwords, or the massive node_modules folder"]
+  },
+  {
+    emoji: "🌿", term: "Branches", cat: "version",
+    short: "Parallel versions of your project",
+    tagline: "Isolation • Parallel work • Merging",
+    analogy: "Imagine duplicating a Figma file to try a risky redesign, without touching the original. If the experiment works, you copy the changes back. If it doesn't, you just delete the duplicate. That's a branch — an isolated version of the code to safely try things in.",
+    what: "A branch is a parallel version of the codebase. The main (or master) branch is the 'official' version — what's live. Feature branches let developers work on new things in isolation. When the work is ready, it gets merged back into main via a pull request.",
+    looks: `main          ●---●---●---●---● (live site)\n                          \\\nfeature/nav                ●---●---● (work in progress)\n                                    \\\nfeature/search                       ●---● (separate work)`,
+    designer: "Branch naming is like Figma frame naming — good names tell you exactly what's in progress. 'feature/checkout-redesign' or 'fix/mobile-nav-spacing' are infinitely more useful than 'branch-1' or 'my-changes'.",
+    claude: "\"I've created a new branch called 'feature/product-card' to build this component. Once we're happy with it, you can open a pull request to merge it into main. Nothing on the live site changes until then.\"",
+    extras: ["Most teams protect the main branch so no one can push directly to it — everything goes through a PR review", "Merge conflicts happen when two branches change the same file in incompatible ways — Git asks you to choose what to keep", "CI/CD (Continuous Integration/Continuous Deployment) automatically tests and deploys whenever a branch is merged"]
+  },
+  {
+    emoji: "🔐", term: "Environment Variables", cat: "tools",
+    short: "Secret settings that change per environment",
+    tagline: "Secrets • Config • .env",
+    analogy: "Imagine you have different Figma files for design exploration, client review, and final handoff — each with slightly different content. Environment variables are settings that change depending on whether code is running locally, in staging, or live in production. Crucially, they hide sensitive things like passwords.",
+    what: "Environment variables are key-value pairs stored outside the code — in a .env file or in your hosting platform's settings. They hold things that should differ between environments (database URLs, API keys, feature flags) and things that should never be in the code (passwords, secret keys).",
+    looks: `# .env.local (never committed to GitHub)\nNEXT_PUBLIC_API_URL=https://api.mysite.com\nDATABASE_URL=postgres://user:pass@host/db\nSECRET_API_KEY=sk_live_abc123`,
+    designer: "The .env file is like a Figma variables file that only you have access to — it's in your .gitignore so it never gets uploaded to GitHub. Each environment (local, staging, production) has its own .env with different values.",
+    claude: "\"The API key goes in a .env file, not in the code — I've added it to .gitignore so it never accidentally gets committed to GitHub. In Vercel, you add these same variables in the Environment Variables settings panel.\"",
+    extras: ["NEXT_PUBLIC_ prefix makes a variable accessible in the browser — without it, the variable only exists server-side", "Never commit a .env file to GitHub — it's one of the most common security mistakes developers make", "Vercel and Netlify have a UI panel for setting environment variables — no file editing required in production"]
+  },
+  {
+    emoji: "🐛", term: "Debugging", cat: "tools",
+    short: "Finding and fixing what's broken",
+    tagline: "Errors • Console • DevTools",
+    analogy: "Debugging is like using Figma's inspect panel to figure out why a component looks wrong. You look at what's actually there versus what you expected, find the mismatch, and fix it. The main tools are the browser's DevTools (F12) and the console (where errors print).",
+    what: "When code breaks, errors appear in the browser's console (accessible via F12 → Console). The error usually says what went wrong and where. You can also use 'console.log()' to print values mid-execution — like adding a temporary annotation in Figma to check a value.",
+    looks: `// Temporary debug line:\nconsole.log('Cart items:', cartItems);\n// Prints the value in the browser console\n// Remove before deploying`,
+    designer: "The browser DevTools (F12) is your code's inspect panel. You can hover any element and see its exact CSS properties — the equivalent of clicking a layer in Figma and seeing all its properties on the right. You can even edit values live to experiment.",
+    claude: "\"There's an error in the console: 'Cannot read properties of undefined'. This means the component is trying to read data before it's loaded. I'll add a loading check to fix it.\"",
+    extras: ["The Network tab in DevTools shows every API call the page makes — what was requested, what came back, and how long it took", "'undefined' and 'null' are two common sources of errors — they mean 'this data doesn't exist yet'", "React DevTools is a browser extension that lets you inspect React component trees — like Figma's layers panel, but for running components"]
+  },
+  {
+    emoji: "🤖", term: "LLM", cat: "ai",
+    short: "What Claude is under the hood",
+    tagline: "Large Language Model • AI • Neural network",
+    analogy: "An LLM is like a designer who has studied every design book, every Dribbble shot, every Figma file, every design article ever written — and learned the patterns, conventions, and language well enough to generate new work that follows those patterns. Except it's done this for basically all human text.",
+    what: "LLM stands for Large Language Model. It's a type of AI trained on enormous amounts of text to predict and generate language. Claude is an LLM. So is ChatGPT (by OpenAI) and Gemini (by Google). They work by predicting the most useful next word, over and over, given the context of your conversation.",
+    looks: `Prompt → [Neural Network, billions\nof parameters, trained on text] → Response\n\nThe model doesn't "know" things the way\nyou do — it predicts what should come next\nbased on patterns in its training.`,
+    designer: "When you ask Claude to 'make it look more premium', it has seen thousands of examples of what 'premium' means in design and code — whitespace, typography weight, colour restraint — and generates output that matches those patterns. Your design vocabulary works because Claude has internalized it.",
+    claude: "\"As an LLM, I predict the most helpful response given your prompt. I don't 'think' the way you do — but I've processed enough examples of good code, good design, and good writing to generate output that follows their patterns reliably.\"",
+    extras: ["'Context window' is how much conversation history Claude can see at once — like working memory", "Claude is made by Anthropic — a company focused on AI safety. Other major LLMs are from OpenAI, Google, and Meta", "Models get updated over time (Claude 3, 3.5, 4...) — newer versions are smarter, faster, or more efficient"]
+  },
+  {
+    emoji: "🎰", term: "Tokens", cat: "ai",
+    short: "How AI counts and charges for text",
+    tagline: "Pricing • Context • Words",
+    analogy: "If language were a mosaic, tokens are the tiles. An LLM doesn't process individual letters or whole words — it breaks text into chunks called tokens. Roughly speaking, 1 token ≈ 1 short word or ¾ of a longer word. 'hamburger' might be 3 tokens: 'ham', 'bur', 'ger'.",
+    what: "Tokens are the units that LLMs process text in. They matter for two reasons: context windows (how much Claude can 'see' at once, measured in tokens) and pricing (API usage is charged per token). A typical short conversation uses a few thousand tokens. Long documents can use hundreds of thousands.",
+    looks: `"I love design" = 4 tokens\n\nA 1,000-word document ≈ 1,300 tokens\nA full-length novel ≈ ~150,000 tokens\n\nClaude's context window: up to 200,000 tokens\n(roughly 150,000 words)`,
+    designer: "You don't need to think about tokens during normal use. They matter if you're a developer building a product on Claude's API — longer prompts and responses cost more. Think of it like Figma's export resolution: usually you don't think about it, until you're building something at scale.",
+    claude: "\"This conversation is getting long — I'm approaching the context window limit. To keep getting the best responses, it might help to start a new chat and paste in just the most relevant context.\"",
+    extras: ["Context window = the token limit of what Claude can see in one conversation", "Input tokens (your prompt) and output tokens (Claude's response) are often priced differently in the API", "Prompt engineering — writing prompts efficiently — partly means not wasting tokens on unnecessary context"]
+  },
+  {
+    emoji: "🔮", term: "Prompt Engineering", cat: "ai",
+    short: "The art of briefing an AI well",
+    tagline: "Context • Constraints • Clarity",
+    analogy: "Prompt engineering is writing a great design brief. A vague brief gets vague work. A specific brief — with context, constraints, examples, and clear goals — gets specific, useful work. The same is true for prompting Claude.",
+    what: "Prompt engineering is the practice of crafting prompts that get consistently better responses from an LLM. It's about providing the right context, being explicit about constraints, giving examples of what good looks like, and breaking complex tasks into clear steps.",
+    looks: `Weak prompt:\n"Make a button"\n\nStrong prompt:\n"Create a React Button component with solid\nand ghost variants, using our brand orange\n(#e85d26). It should accept a label prop,\ndisabled state, and loading state with a\nspinner. Use Tailwind. Follow our existing\ncomponent patterns from the codebase."`,
+    designer: "Your design training is the perfect foundation for prompt engineering. You know how to brief — you understand context, constraints, and what 'good' looks like. Apply that same rigour to writing prompts. Show don't just tell: paste in examples of existing components for Claude to match.",
+    claude: "\"The more context you give me, the better I can match your existing system. Sharing an example of an existing component, your colour tokens, and your spacing rules means I can produce something that fits right in — rather than something generic.\"",
+    extras: ["System prompts (in the API) let you give Claude persistent instructions that apply to every message — like a standing brief", "'Few-shot' prompting means giving 2–3 examples of what you want before asking for the real thing", "Being specific about format helps: 'respond only with code, no explanation' or 'explain step by step before writing any code'"]
+  },
+  {
+    emoji: "🏛️", term: "Framework", cat: "framework",
+    short: "A starter kit with strong opinions baked in",
+    tagline: "Structure • Conventions • Tooling",
+    analogy: "A framework is like a Figma template with a design system already set up — grid, components, styles, file structure all pre-made, with strong opinions about how you should work. You could start from scratch, but why would you?",
+    what: "A framework is a collection of pre-written code, conventions, and tools that provides a structure for building applications. Instead of making every architectural decision yourself, a framework makes them for you — and other developers already know how frameworks are organised.",
+    looks: `Popular frameworks:\n• Next.js → Full-stack React apps\n• Astro → Content/marketing sites\n• Remix → Data-heavy React apps\n• Vue + Nuxt → Alternative to React\n• SvelteKit → Lightweight alternative`,
+    designer: "Next.js is the framework Claude defaults to for most web projects. It handles routing (pages), server-side logic, image optimisation, and deployment configuration automatically. It's like a Figma file with your grid, components, and styles already set up — you just design.",
+    claude: "\"I'm using Next.js for this project — it handles routing automatically (any file in the /pages folder becomes a URL), has built-in image optimisation, and Vercel deploys it with zero configuration.\"",
+    extras: ["'Library' vs 'framework': a library (like React) does one thing well; a framework (like Next.js) is an entire opinionated structure", "The 'framework wars' (React vs Vue vs Svelte) are like the Figma vs Sketch wars — mostly preference, some real differences", "Claude can work in any framework — just tell it which one you're using"]
+  },
+  {
+    emoji: "🗄️", term: "Database", cat: "foundation",
+    short: "Where your product's data actually lives",
+    tagline: "Storage • Queries • Persistence",
+    analogy: "A database is like a very organised spreadsheet that lives on a server, can be accessed by your app in real time, and handles millions of rows without breaking a sweat. User accounts, product listings, orders, blog posts — all of this lives in a database.",
+    what: "A database stores data persistently — meaning it survives after the page reloads or the server restarts. SQL databases (Postgres, MySQL) store data in tables like spreadsheets. NoSQL databases (MongoDB, Firestore) store data as flexible JSON-like objects. Your app reads from and writes to the database via the backend.",
+    looks: `Users table:\nid | name      | email          | created_at\n1  | Alex      | alex@email.com  | 2024-01-15\n2  | Sam       | sam@email.com   | 2024-02-03\n\nQuery: SELECT * FROM users WHERE id = 1`,
+    designer: "As a designer, you care about databases when designing forms (what data are we collecting?), empty states (what does the UI show when there's no data?), and loading states (data takes time to fetch). Claude thinks about all of these when building full features.",
+    claude: "\"I've set up a Postgres database with two tables: products and orders. The product listing page fetches from the database on each request so it's always up to date. I've also added loading skeletons for when the data is fetching.\"",
+    extras: ["SQL (Structured Query Language) is how you talk to most databases — SELECT, INSERT, UPDATE, DELETE", "Prisma is a popular tool that lets Claude write database queries in JavaScript instead of raw SQL", "Supabase and PlanetScale are popular hosted databases that Claude commonly recommends — zero infrastructure to manage"]
+  }
+];
+
+const quizData = [
+  { q: "Your dev says 'the PR is ready for review.' What do you expect to find?", opts: ["A live link to the deployed site", "A set of proposed code changes waiting for review — like leaving comments on a Figma frame", "A list of npm packages that need updating", "An error in the terminal"], correct: 1, explain: "A pull request (PR) is a proposal to merge code changes into the main project. Just like reviewing a Figma design before it's signed off — you review the code, leave comments, and approve or request changes." },
+  { q: "Claude says it's 'using Tailwind for spacing.' As a designer, this most closely means:", opts: ["It's ignoring your design tokens and making up values", "It's using a pre-built spacing system based on a 4px grid — like Figma's 8pt grid but in code", "It's writing inline styles for every element individually", "It's using CSS Grid for the entire layout"], correct: 1, explain: "Tailwind's spacing scale (p-4 = 16px, p-6 = 24px etc.) enforces consistent increments exactly like an 8pt grid system in Figma. It's design-systemic thinking, baked into the code." },
+  { q: "What's the difference between 'localhost' and the live website?", opts: ["localhost is faster, the live site is slower", "localhost only works on your computer right now; the live site is deployed and accessible to everyone", "localhost is the staging environment, the live site is production", "There's no real difference, they show the same thing"], correct: 1, explain: "localhost is a private preview — like Figma's presentation mode, but only on your screen. The live site is deployed on a server with a real URL that anyone can visit." },
+  { q: "Claude asks: 'Should I add TypeScript to this project?' As a designer collaborator, the best way to think about TypeScript is:", opts: ["A completely different programming language to JavaScript", "A strict design system layer on top of JavaScript that catches mistakes before they reach users", "A tool that makes the code run faster", "The same as a CSS framework — it changes how things look"], correct: 1, explain: "TypeScript adds type safety to JavaScript — like a design linter that catches 'you passed a number where a string was expected' before the code even runs. More structure, fewer surprises." },
+  { q: "Your team says 'we need to work in a feature branch.' What does that mean for the codebase?", opts: ["Everyone stops working on the main code until the feature is done", "You create an isolated copy of the codebase to work in — like duplicating a Figma file to try a risky redesign", "The entire repository gets a new name", "You delete the current code and start fresh for the feature"], correct: 1, explain: "A branch is an isolated copy of the codebase — like duplicating your Figma file to experiment freely. If it works, you merge it back. If it doesn't, you discard the branch and the main file is untouched." },
+  { q: "A developer mentions 'environment variables'. As a designer, you should understand that these are:", opts: ["Variables in CSS that control colours and spacing (like CSS variables)", "Secret settings stored outside the code — like API keys and passwords — that change per environment", "JavaScript variables that hold UI state", "Figma variables that have been exported to code"], correct: 1, explain: "Environment variables are secret settings (API keys, database passwords) stored in a .env file — never committed to GitHub. Think of them as the confidential config layer that changes between your local setup, staging, and production." },
+  { q: "What is an LLM, and how does Claude relate to it?", opts: ["A coding language that Claude writes in", "A design tool similar to Figma, made by Anthropic", "A Large Language Model — the type of AI Claude is, trained on vast amounts of text to generate language", "A file format for AI-generated assets"], correct: 2, explain: "LLM stands for Large Language Model. Claude is an LLM — a neural network trained on enormous amounts of text to generate language. It predicts the most helpful response given your prompt, drawing on patterns from its training." },
+  { q: "Claude mentions 'connecting to a database'. As a designer, which concern is most directly relevant to your work?", opts: ["Which SQL syntax style to use for the queries", "The loading state, empty state, and error state designs — since data takes time to fetch and sometimes doesn't exist", "Whether to use Postgres or MySQL", "How many rows the database table needs to support"], correct: 1, explain: "The moment real data is involved, loading states, empty states, and error states become real design problems. Data takes time to fetch, sometimes returns nothing, and sometimes fails. These are UX states you need to design for." }
+];
+
+let currentQ = 0, score = 0, answered = false;
+
+function filterCat(cat, el) {
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.gloss-card').forEach(card => {
+    const cardCat = card.dataset.cat;
+    card.classList.toggle('hidden', cat !== 'all' && cardCat !== cat);
+  });
+  closePanel();
+}
+
+function initGlossary() {
+  const grid = document.getElementById('glossaryGrid');
+  glossaryData.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'gloss-card';
+    card.dataset.cat = item.cat;
+    card.innerHTML = `<span class="card-emoji">${item.emoji}</span><p class="card-cat">${item.cat}</p><p class="card-name">${item.term}</p><p class="card-short">${item.short}</p><span class="card-tag">${item.tagline}</span>`;
+    card.style.transitionDelay = (i % 8 * 0.04) + 's';
+    card.onclick = () => toggleCard(i, card);
+    grid.appendChild(card);
+  });
+}
+
+function toggleCard(i, card) {
+  const panel = document.getElementById('expandPanel');
+  const d = glossaryData[i];
+  if (card.classList.contains('active')) { closePanel(); return; }
+  document.querySelectorAll('.gloss-card').forEach(c => c.classList.remove('active'));
+  card.classList.add('active');
+  document.getElementById('panelEmoji').textContent = d.emoji;
+  document.getElementById('panelTitle').textContent = d.term;
+  document.getElementById('panelTagline').textContent = d.tagline;
+  document.getElementById('panelSections').innerHTML = `
+    <div class="panel-block"><p class="panel-block-label">🎨 The designer analogy</p><p class="analogy-text">${d.analogy}</p></div>
+    <div class="panel-block"><p class="panel-block-label">📖 What it actually is</p><p>${d.what}</p></div>
+    <div class="panel-block full"><p class="panel-block-label">👀 What it looks like</p><div class="code-snip">${d.looks}</div></div>
+    <div class="panel-block"><p class="panel-block-label">🎯 For designers specifically</p><p>${d.designer}</p></div>
+    <div class="panel-block"><p class="panel-block-label">💬 When Claude says it</p><div class="claude-says">${d.claude}</div></div>
+    <div class="panel-block full"><p class="panel-block-label">✦ Also worth knowing</p><ul>${d.extras.map(e => `<li>${e}</li>`).join('')}</ul></div>
+  `;
+  panel.classList.add('open');
+  setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+}
+
+function closePanel() {
+  document.getElementById('expandPanel').classList.remove('open');
+  document.querySelectorAll('.gloss-card').forEach(c => c.classList.remove('active'));
+}
+
+function loadQ(idx) {
+  if (idx >= quizData.length) {
+    document.getElementById('quizWrap').innerHTML = `<p style="font-size:1.5rem;font-weight:700;margin-bottom:10px;">Score: ${score}/${quizData.length}</p><p style="color:var(--muted);font-size:0.95rem;line-height:1.7;">${score >= 7 ? "🎉 Exceptional. You're already thinking like a design-dev hybrid." : score >= 5 ? "👍 Solid. A few more projects with Claude and these concepts will be second nature." : "🤔 Keep going — read through the glossary again and it'll all click. It did for me."}</p>`;
+    return;
+  }
+  const q = quizData[idx];
+  answered = false;
+  document.getElementById('quizMeta').textContent = `Question ${idx+1} of ${quizData.length}`;
+  document.getElementById('quizQ').textContent = q.q;
+  const opts = document.getElementById('quizOpts');
+  opts.innerHTML = '';
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-btn';
+    btn.textContent = opt;
+    btn.onclick = () => answerQ(i);
+    opts.appendChild(btn);
+  });
+  document.getElementById('quizResult').className = 'quiz-result';
+  document.getElementById('quizResult').textContent = '';
+  document.getElementById('quizNext').className = 'quiz-next';
+}
+
+function answerQ(chosen) {
+  if (answered) return;
+  answered = true;
+  const q = quizData[currentQ];
+  document.querySelectorAll('.quiz-btn').forEach((b, i) => {
+    b.classList.add(i === q.correct ? 'correct' : 'wrong');
+  });
+  const res = document.getElementById('quizResult');
+  if (chosen === q.correct) { score++; res.textContent = '✓ ' + q.explain; res.className = 'quiz-result show good'; }
+  else { res.textContent = '✕ Not quite. ' + q.explain; res.className = 'quiz-result show bad'; }
+  document.getElementById('quizNext').className = 'quiz-next show';
+}
+
+function nextQ() { currentQ++; loadQ(currentQ); }
+
+// NAV + SCROLL
+const sections = document.querySelectorAll('section');
+const navDots = document.getElementById('navDots');
+const sectionNames = ['Intro','Journey','Two Worlds','Glossary','Before You Start','Inside Claude','Quiz','Lessons','Fin'];
+sections.forEach((s, i) => {
+  const dot = document.createElement('button');
+  dot.className = 'nav-dot';
+  dot.title = sectionNames[i] || '';
+  dot.onclick = () => s.scrollIntoView({ behavior: 'smooth' });
+  navDots.appendChild(dot);
+});
+
+function onScroll() {
+  const scrollY = window.scrollY;
+  const total = document.body.scrollHeight - window.innerHeight;
+  document.getElementById('progress').style.width = (scrollY / total * 100) + '%';
+  const dots = document.querySelectorAll('.nav-dot');
+  sections.forEach((s, i) => {
+    const r = s.getBoundingClientRect();
+    if (r.top <= window.innerHeight * 0.5 && r.bottom >= window.innerHeight * 0.5) {
+      dots.forEach(d => d.classList.remove('active'));
+      dots[i]?.classList.add('active');
+    }
+  });
+  document.querySelectorAll('.timeline-item, .lesson-item, .brain-step').forEach(el => {
+    if (el.getBoundingClientRect().top < window.innerHeight - 50) el.classList.add('visible');
+  });
+  document.querySelectorAll('.gloss-card').forEach(el => {
+    if (el.getBoundingClientRect().top < window.innerHeight - 30) el.classList.add('visible');
+  });
+}
+
+window.addEventListener('scroll', onScroll);
+onScroll();
+initGlossary();
+loadQ(0);
+</script>
+</body>
+</html>
